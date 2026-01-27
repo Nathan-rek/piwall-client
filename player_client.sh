@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VIDEO=${2:-"/home/pi-nath/Documents/piwall/video/video.mp4"} # 2ème argument = chemin vidéo
+VIDEO=${2:-"$BASEDIR/video/video.mp4"} # 2ème argument = chemin vidéo
 SOCKET="/tmp/mpvsocket"
 CMD=$1  # play / pause / stop
 
