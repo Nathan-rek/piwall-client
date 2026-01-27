@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 # 1️⃣ Définir la vidéo : soit deuxième argument, soit vidéo par défaut dans ./video/
 VIDEO=${2:-"video/video.mp4"}  # chemin relatif au dossier du script
 SOCKET="/tmp/mpvsocket"
