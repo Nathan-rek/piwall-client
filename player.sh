@@ -1,32 +1,42 @@
 #!/bin/bash
 
 CMD=$1
-VIDEO=${2:-"$HOME/Documents/piwall-client/video/video.mp4"}
+VIDEO=${2:-"video/video.mp4"}
+START_AT=$3
 SOCKET="/tmp/mpvsocket"
 
 export DISPLAY=:0
-export XAUTHORITY="$HOME/.Xauthority"
 
-if ! pgrep mpv >/dev/null; then
-    mpv --fs --no-border \
-        --input-ipc-server="$SOCKET" \
-        --no-terminal \
-        "$VIDEO" &
-    sleep 1
+# Nettoyage
+pkill mpv 2>/dev/null
+rm -f "$SOCKET"
+
+# Attente sync si demandée
+if [ -n "$START_AT" ]; then
+  NOW=$(date +%s.%N)
+  DELAY=$(echo "$START_AT - $NOW" | bc)
+  if (( $(echo "$DELAY > 0" | bc -l) )); then
+    sleep "$DELAY"
+  fi
 fi
 
-case "$CMD" in
-    play)
-        echo '{ "command": ["set_property", "pause", false] }' | socat - UNIX-CONNECT:$SOCKET
-        ;;
-    pause)
-        echo '{ "command": ["set_property", "pause", true] }' | socat - UNIX-CONNECT:$SOCKET
-        ;;
-    stop)
-        pkill mpv
-        ;;
-    *)
-        echo "Usage: play|pause|stop [video]"
-        ;;
-esac
+# Lancer mpv DIRECTEMENT avec la vidéo
+nohup mpv --fs --no-border --input-ipc-server="$SOCKET" "$VIDEO" \
+  >/dev/null 2>&1 &
 
+sleep 0.5
+
+# Commandes simples
+case "$CMD" in
+  play|play_at)
+    echo '{ "command": ["set_property", "pause", false] }' \
+      | socat - UNIX-CONNECT:"$SOCKET"
+    ;;
+  pause)
+    echo '{ "command": ["set_property", "pause", true] }' \
+      | socat - UNIX-CONNECT:"$SOCKET"
+    ;;
+  stop)
+    pkill mpv
+    ;;
+esac

@@ -30,3 +30,11 @@ sudo crontab -e
 
 
 sudo crontab -l
+
+FFMPEG FLUX
+
+pi-master
+ffmpeg -re -i ~/Documents/piwall/video/video.mp4 -c:v copy -f mpegts udp://10.0.0.11:1234
+
+pi-client
+mpv --hwdec=v4l2m2m udp://10.0.0.10:1234 --no-audio --fullscreen
